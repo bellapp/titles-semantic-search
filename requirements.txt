@@ -1,0 +1,8 @@
+streamlit
+elasticsearch
+sentence-transformers
+openai
+cohere
+python-dotenv
+requests
+voyageai
