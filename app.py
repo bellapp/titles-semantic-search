@@ -37,7 +37,8 @@ def load_st_model():
 
 @st.cache_resource
 def load_openai_client():
-    api_key = os.environ.get("OPENAI_API_KEY")
+    # api_key = os.environ.get("OPENAI_API_KEY")
+    api_key = st.secrets["OPENAI_API_KEY"]
     if not api_key:
         st.error("OPENAI_API_KEY not set in .env file!")
         return None
@@ -45,7 +46,8 @@ def load_openai_client():
 
 @st.cache_resource
 def load_cohere_client():
-    api_key = os.environ.get("COHERE_API_KEY")
+    # api_key = os.environ.get("COHERE_API_KEY")
+    api_key = st.secrets["COHERE_API_KEY"]
     if not api_key:
         st.error("COHERE_API_KEY not set in .env file!")
         return None
@@ -53,7 +55,8 @@ def load_cohere_client():
 
 @st.cache_resource
 def load_voyageai_client():
-    api_key = os.environ.get("VOYAGEAI_API_KEY")
+    # api_key = os.environ.get("VOYAGEAI_API_KEY")
+    api_key = st.secrets["VOYAGEAI_API_KEY"]
     if not api_key:
         st.error("VOYAGEAI_API_KEY not set in .env file!")
         return None
