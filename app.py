@@ -12,7 +12,7 @@ import voyageai
 st.set_page_config(layout="wide", page_title="Job Title Similarity Comparison")
 
 # --- 1. CONFIGURATION (Copied from your script) ---
-ES_HOST = "http://localhost:9210"
+ES_HOST = "https://my-elasticsearch-project-b80414.es.us-central1.gcp.elastic.cloud:443"
 LOCAL_API_URL = "http://localhost:8080/api/intelligence/generate/similars"
 
 # Index names for each model
@@ -64,7 +64,16 @@ def load_voyageai_client():
 
 @st.cache_resource
 def load_es_client():
-    return Elasticsearch(ES_HOST)
+    es_host = ES_HOST
+    es_api_key = st.secrets["ES_CLOUD_API_KEY"]
+    return Elasticsearch(
+        es_host,
+        api_key=es_api_key,
+        verify_certs=True,
+        timeout=60,
+        max_retries=3,
+        retry_on_timeout=True
+    )
 
 # --- 3. SEARCH FUNCTIONS (Adapted for Streamlit) ---
 # These are your functions, slightly adapted to take clients as arguments.
