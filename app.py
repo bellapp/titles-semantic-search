@@ -188,7 +188,7 @@ if search_button:
 
     # --- Column 2: Sentence Transformer (Local) ---
     with col2:
-        st.subheader("Sentence Transformer")
+        st.subheader("Sentence Trans")
         if results_local:
             for item in results_local:
                 # st.markdown(f"**{item['similarity_score']:.4f}** | {item['title']}")
