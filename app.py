@@ -13,7 +13,8 @@ st.set_page_config(layout="wide", page_title="Job Title Similarity Comparison")
 
 # --- 1. CONFIGURATION (Copied from your script) ---
 ES_HOST = "https://my-elasticsearch-project-b80414.es.us-central1.gcp.elastic.cloud:443"
-LOCAL_API_URL = "http://localhost:8080/api/intelligence/generate/similars"
+# LOCAL_API_URL = "http://localhost:8080/api/intelligence/generate/similars"
+LOCAL_API_URL = "https://parser-demo.hme.ovh/api/intelligence/generate/similars"
 
 # Index names for each model
 TITLES_DICTIONARY_LOCAL = "embedding_dictionary_local_model"
