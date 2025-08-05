@@ -33,7 +33,7 @@ load_dotenv()
 # Cache the models and clients so they don't reload on every interaction.
 @st.cache_resource
 def load_st_model():
-    return SentenceTransformer(MODEL_NAME_LOCAL, use_auth_token=st.secrets["HF_TOKEN"]))
+    return SentenceTransformer(MODEL_NAME_LOCAL, use_auth_token=st.secrets["HF_TOKEN"])
 
 @st.cache_resource
 def load_openai_client():
