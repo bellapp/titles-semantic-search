@@ -101,6 +101,7 @@ def find_similar_titles_openai(es, client, query_title: str, top_k: int):
     try:
         query_vector = client.embeddings.create(input=[query_title], model=MODEL_NAME_OPENAI).data[0].embedding
         knn_query = {"field": "title_embedding", "query_vector": query_vector, "k": top_k, "num_candidates": 100}
+        print('OpenAi vector query :', query_vector)
         response = es.search(index=TITLES_DICTIONARY_OPENAI, knn=knn_query, size = top_k)
         return [{"title": hit['_source']['title'], "similarity_score": hit['_score']} for hit in response['hits']['hits']]
     except Exception as e:
