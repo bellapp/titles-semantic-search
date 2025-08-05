@@ -71,7 +71,7 @@ def load_es_client():
         es_host,
         api_key=es_api_key,
         verify_certs=True,
-        timeout=60,
+      
         max_retries=3,
         retry_on_timeout=True
     )
