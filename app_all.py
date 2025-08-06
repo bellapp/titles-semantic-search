@@ -5,7 +5,7 @@ from elasticsearch import Elasticsearch
 import cohere
 import voyageai
 import vertexai
-import json
+import json # <--- IMPORT THE JSON LIBRARY
 from google.oauth2 import service_account
 from openai import OpenAI
 from sentence_transformers import SentenceTransformer
@@ -15,7 +15,6 @@ from vertexai.language_models import TextEmbeddingModel
 st.set_page_config(layout="wide", page_title="Job Title Similarity Comparison")
 
 # --- 1. CONFIGURATION (Now from st.secrets) ---
-# These values will be pulled from your Streamlit Cloud secrets
 try:
     ES_HOST = st.secrets["connections"]["elasticsearch"]["host"]
     LOCAL_API_URL = st.secrets["connections"]["custom_api"]["url"]
@@ -25,8 +24,7 @@ except (KeyError, FileNotFoundError):
     st.error("Secrets for Elasticsearch, Custom API, or GCP are not set. Please configure them in your Streamlit Cloud settings.")
     st.stop()
 
-
-# Index and Model names (these are safe to keep in the code)
+# Index and Model names
 TITLES_DICTIONARY_LOCAL = "embedding_dictionary_local_model"
 TITLES_DICTIONARY_OPENAI = "embedding_dictionary_openai"
 TITLES_DICTIONARY_COHERE = "embedding_dictionary_cohere"
@@ -46,31 +44,32 @@ def load_st_model():
 
 @st.cache_resource
 def load_openai_client():
-    if "OPENAI_API_KEY" not in st.secrets:
-        st.error("OpenAI API key not found in secrets."); return None
+    if "OPENAI_API_KEY" not in st.secrets: st.error("OpenAI API key not found in secrets."); return None
     return OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 @st.cache_resource
 def load_cohere_client():
-    if "COHERE_API_KEY" not in st.secrets:
-        st.error("Cohere API key not found in secrets."); return None
+    if "COHERE_API_KEY" not in st.secrets: st.error("Cohere API key not found in secrets."); return None
     return cohere.Client(st.secrets["COHERE_API_KEY"])
 
 @st.cache_resource
 def load_voyageai_client():
-    if "VOYAGEAI_API_KEY" not in st.secrets:
-        st.error("VoyageAI API key not found in secrets."); return None
+    if "VOYAGEAI_API_KEY" not in st.secrets: st.error("VoyageAI API key not found in secrets."); return None
     return voyageai.Client(st.secrets["VOYAGEAI_API_KEY"])
 
+# --- THIS FUNCTION IS NOW CORRECTED ---
 @st.cache_resource
 def load_google_client():
     """Initializes Google Vertex AI client using a service account from st.secrets."""
     try:
-        # Load the service account JSON from Streamlit secrets
-        gcp_creds_dict = st.secrets["gcp"]["service_account"]
+        # Get the service account JSON string from secrets
+        gcp_creds_string = st.secrets["gcp"]["service_account"]
+        # Parse the string into a Python dictionary
+        gcp_creds_dict = json.loads(gcp_creds_string)
+        
+        # Use the dictionary to create credentials
         credentials = service_account.Credentials.from_service_account_info(gcp_creds_dict)
         
-        # Initialize Vertex AI with the credentials
         vertexai.init(project=GOOGLE_PROJECT_ID, location=GOOGLE_LOCATION, credentials=credentials)
         return TextEmbeddingModel.from_pretrained(MODEL_NAME_GOOGLE)
     except Exception as e:
@@ -79,21 +78,20 @@ def load_google_client():
 
 @st.cache_resource
 def load_es_client():
-    """Initializes Elasticsearch client using credentials from st.secrets."""
+    """Initializes Elasticsearch client using an API Key from st.secrets."""
     try:
         return Elasticsearch(
             hosts=[ES_HOST],
-            basic_auth=(
-                st.secrets["connections"]["elasticsearch"]["username"],
-                st.secrets["connections"]["elasticsearch"]["password"]
+            api_key=(
+                st.secrets["connections"]["elasticsearch"]["id"],
+                st.secrets["connections"]["elasticsearch"]["api_key"] # This looks for "api_key"
             )
         )
     except Exception as e:
-        st.error(f"Failed to connect to Elasticsearch. Check your host and credentials in secrets. Error: {e}")
+        st.error(f"Failed to connect to Elasticsearch. Check your host and API Key in secrets. Error: {e}")
         return None
 
-# --- 3. SEARCH FUNCTIONS (Unchanged logic, just using clients from cache) ---
-# ... (All your find_similar_titles_* functions remain here, no changes needed) ...
+# --- 3. SEARCH FUNCTIONS (No changes needed here) ---
 def find_similar_titles_api(query_title: str, top_k: int):
     payload = {"mode": "synonyms", "inputs": [{"input_type": "titles", "input_value": query_title, "size": top_k}]}
     try:
@@ -160,9 +158,10 @@ def find_similar_titles_google(es, model, query_title: str, top_k: int):
     except Exception as e:
         st.error(f"Google Vertex AI Error: {e}"); return []
 
-# --- 4. STREAMLIT UI (Unchanged) ---
+# --- 4. STREAMLIT UI (No changes needed here) ---
 st.title("Job Title Similarity Comparison")
-# ... (The rest of your UI code remains exactly the same) ...
+
+
 st.subheader("Search Parameters")
 col_input1, col_input2, col_input3 = st.columns([4, 2, 1])
 
@@ -178,6 +177,7 @@ with col_input3:
 st.markdown("---")
 
 if search_button and query_title_input:
+    # Load all models and clients
     model_local = load_st_model()
     client_openai = load_openai_client()
     client_cohere = load_cohere_client()
@@ -185,7 +185,8 @@ if search_button and query_title_input:
     model_google = load_google_client()
     es = load_es_client()
 
-    with st.spinner("Running all search models..."):
+    with st.spinner("Running all search models... This may take a moment."):
+        # Run all searches
         results_api = find_similar_titles_api(query_title_input, top_k_input)
         results_local = find_similar_titles_local(es, model_local, query_title_input, top_k_input)
         results_openai = find_similar_titles_openai(es, client_openai, query_title_input, top_k_input)
@@ -194,5 +195,50 @@ if search_button and query_title_input:
         results_google = find_similar_titles_google(es, model_google, query_title_input, top_k_input)
 
     st.header(f"Comparison Results for: '{query_title_input}'")
+
     res_col1, res_col2, res_col3, res_col4, res_col5, res_col6 = st.columns(6)
-    # ... (The rest of your column display code is unchanged) ...
+
+    with res_col1:
+        st.subheader("Local Synonym API")
+        if results_api:
+            for item in results_api:
+                st.markdown(f"{item['title']}<hr>", unsafe_allow_html=True)
+        else: st.warning("No results found.")
+
+    with res_col2:
+        st.subheader("Sentence Transformer")
+        if results_local:
+            for item in results_local:
+                st.markdown(f"**{item['similarity_score']:.4f}** | {item['title']}<hr>", unsafe_allow_html=True)
+        else: st.warning("No results found.")
+
+    with res_col3:
+        st.subheader("OpenAI")
+        if results_openai:
+            for item in results_openai:
+                st.markdown(f"**{item['similarity_score']:.4f}** | {item['title']}<hr>", unsafe_allow_html=True)
+        else: st.warning("No results found.")
+
+    with res_col4:
+        st.subheader("Cohere")
+        if results_cohere:
+            for item in results_cohere:
+                st.markdown(f"**{item['similarity_score']:.4f}** | {item['title']}<hr>", unsafe_allow_html=True)
+        else: st.warning("No results found.")
+
+    with res_col5:
+        st.subheader("Voyage AI")
+        if results_voyageai:
+            for item in results_voyageai:
+                st.markdown(f"**{item['similarity_score']:.4f}** | {item['title']}<hr>", unsafe_allow_html=True)
+        else: st.warning("No results found.")
+
+    with res_col6:
+        st.subheader("Google Vertex AI")
+        if results_google:
+            for item in results_google:
+                st.markdown(f"**{item['similarity_score']:.4f}** | {item['title']}<hr>", unsafe_allow_html=True)
+        else:
+            st.warning("No results found.")
+else:
+    st.info("Enter a job title above and click 'Run Comparison' to see the results.")
