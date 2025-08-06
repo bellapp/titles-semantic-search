@@ -63,9 +63,9 @@ def load_google_client():
     """Initializes Google Vertex AI client using a service account from st.secrets."""
     try:
         # Get the service account JSON string from secrets
-        print(' try to print service_account')
+        st.write('try to print service_account')
         gcp_creds_string = st.secrets["gcp"]["service_account"]
-        print('=== gcp_creds_string  ===',gcp_creds_string)
+        st.write('=== gcp_creds_string  ===', gcp_creds_string[:300])  #
         # Parse the string into a Python dictionary
         gcp_creds_dict = json.loads(gcp_creds_string)
         
