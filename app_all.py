@@ -18,8 +18,8 @@ st.set_page_config(layout="wide", page_title="Job Title Similarity Comparison")
 try:
     ES_HOST = st.secrets["connections"]["elasticsearch"]["host"]
     LOCAL_API_URL = st.secrets["connections"]["custom_api"]["url"]
-    GOOGLE_PROJECT_ID = st.secrets["gcp"]["project_id"]
-    GOOGLE_LOCATION = st.secrets["gcp"]["location"]
+    GOOGLE_PROJECT_ID = st.secrets["gcp_service_account"]["project_id"]
+    GOOGLE_LOCATION = st.secrets["gcp_service_account"]["location"]
 except (KeyError, FileNotFoundError):
     st.error("Secrets for Elasticsearch, Custom API, or GCP are not set. Please configure them in your Streamlit Cloud settings.")
     st.stop()
