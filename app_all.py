@@ -64,6 +64,7 @@ def load_google_client():
     try:
         # Get the service account JSON string from secrets
         gcp_creds_string = st.secrets["gcp"]["service_account"]
+        print('=== gcp_creds_string  ===',gcp_creds_string)
         # Parse the string into a Python dictionary
         gcp_creds_dict = json.loads(gcp_creds_string)
         
