@@ -1,8 +1,9 @@
 streamlit
+requests
 elasticsearch
+python-dotenv
 sentence-transformers
 openai
 cohere
-python-dotenv
-requests
 voyageai
+google-cloud-aiplatform
