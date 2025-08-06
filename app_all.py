@@ -82,10 +82,11 @@ def load_es_client():
     try:
         return Elasticsearch(
             hosts=[ES_HOST],
-            api_key=(
-                st.secrets["connections"]["elasticsearch"]["id"],
-                st.secrets["connections"]["elasticsearch"]["api_key"] # This looks for "api_key"
-            )
+            api_key=st.secrets["connections"]["elasticsearch"]["api_key"]
+            # api_key=(
+            #     st.secrets["connections"]["elasticsearch"]["id"],
+            #     st.secrets["connections"]["elasticsearch"]["api_key"] # This looks for "api_key"
+            # )
         )
     except Exception as e:
         st.error(f"Failed to connect to Elasticsearch. Check your host and API Key in secrets. Error: {e}")
