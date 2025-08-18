@@ -37,6 +37,8 @@ MODEL_NAME_OPENAI  = "text-embedding-3-small"     # 1536 dims
 MODEL_NAME_COHERE  = "embed-multilingual-v3.0"
 MODEL_NAME_VOYAGEAI = "voyage-3-large"
 MODEL_NAME_GOOGLE  = "text-multilingual-embedding-002"
+MODEL_E5_MULTI_BASE = "intfloat__multilingual-e5-base"
+MODEL_E5_MULTI_BASE_QUANT = "multilingual-e5-base-quant"
 
 # --- 1. Loading / Clients ---
 @st.cache_resource
@@ -142,14 +144,14 @@ def find_similar_titles_google(es, model, query_title: str, top_k: int):
     except Exception as e:
         st.error(f"Google Error: {e}"); return []
 
-def find_similar_titles_e5(es, query_title: str, top_k: int, index_name: str):
+def find_similar_titles_e5(es, query_title: str, top_k: int, index_name: str, model_id: str):
     if not es: return []
     try:
         knn_query = {
             "field": "title_embedding",
             "query_vector_builder": {
                 "text_embedding": {
-                    "model_id": index_name,   # E5 model id inside ES
+                    "model_id": model_id,
                     "model_text": query_title
                 }
             },
@@ -157,7 +159,8 @@ def find_similar_titles_e5(es, query_title: str, top_k: int, index_name: str):
             "num_candidates": 100
         }
         resp = es.search(index=index_name, knn=knn_query, size=top_k)
-        return [{"title": h["_source"]["title"], "similarity_score": h["_score"]} for h in resp['hits']['hits']]
+        return [{"title": h["_source"]["title"], "similarity_score": h["_score"]}
+                for h in resp['hits']['hits']]
     except Exception as e:
         st.error(f"E5 Error: {e}")
         return []
@@ -190,8 +193,11 @@ if search_button and query_title_input:
         results_cohere  = find_similar_titles_cohere(es, client_coh, query_title_input, top_k_input)
         results_voyage  = find_similar_titles_voyage(es, client_voy, query_title_input, top_k_input)
         results_google  = find_similar_titles_google(es, client_g, query_title_input, top_k_input)
-        results_e5      = find_similar_titles_e5(es, query_title_input, top_k_input, TITLES_DICTIONARY_E5)
-        results_e5quant = find_similar_titles_e5(es, query_title_input, top_k_input, TITLES_DICTIONARY_E5_QUANT)
+        results_e5 = find_similar_titles_e5(es, query_title_input, top_k_input,TITLES_DICTIONARY_E5, MODEL_E5_MULTI_BASE)
+        results_e5quant = find_similar_titles_e5(es, query_title_input, top_k_input,    TITLES_DICTIONARY_E5_QUANT, MODEL_E5_MULTI_BASE_QUANT)
+        
+        # results_e5      = find_similar_titles_e5(es, query_title_input, top_k_input, TITLES_DICTIONARY_E5)
+        # results_e5quant = find_similar_titles_e5(es, query_title_input, top_k_input, TITLES_DICTIONARY_E5_QUANT)
 
     st.header(f"Comparison Results for: '{query_title_input}'")
     res_cols = st.columns(7)
