@@ -11,7 +11,7 @@ from sentence_transformers import SentenceTransformer
 from vertexai.language_models import TextEmbeddingModel
 
 # --- Page Configuration ---
-st.set_page_config(layout="wide", page_title="Job Title Similarity Comparison")
+st.set_page_config(layout="wide", page_title="Job Title Similarity Comparison - Developer- ")
 
 # --- CONFIGURATION ---
 try:
@@ -173,7 +173,7 @@ col1, col2, col3 = st.columns([4,2,1])
 with col1:
     query_title_input = st.text_input("Job Title", value="senior java developer", label_visibility="collapsed")
 with col2:
-    top_k_input = st.slider("Number of Results", min_value=5, max_value=100, value=15, label_visibility="collapsed")
+    top_k_input = st.slider("Number of Results", min_value=5, max_value=100, value=20, label_visibility="collapsed")
 with col3:
     search_button = st.button("Run Comparison", type="primary", use_container_width=True)
 
@@ -195,7 +195,7 @@ if search_button and query_title_input:
         results_google  = find_similar_titles_google(es, client_g, query_title_input, top_k_input)
         results_e5 = find_similar_titles_e5(es, query_title_input, top_k_input,TITLES_DICTIONARY_E5, MODEL_E5_MULTI_BASE)
         results_e5quant = find_similar_titles_e5(es, query_title_input, top_k_input,    TITLES_DICTIONARY_E5_QUANT, MODEL_E5_MULTI_BASE_QUANT)
-        
+
         # results_e5      = find_similar_titles_e5(es, query_title_input, top_k_input, TITLES_DICTIONARY_E5)
         # results_e5quant = find_similar_titles_e5(es, query_title_input, top_k_input, TITLES_DICTIONARY_E5_QUANT)
 
