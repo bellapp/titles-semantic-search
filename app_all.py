@@ -203,7 +203,7 @@ if search_button and query_title_input:
     res_cols = st.columns(7)
 
     with res_cols[0]:
-        st.subheader("Local Synonym API")
+        st.subheader("Actual solution (LLM)")
         if results_api:
             for item in results_api: st.markdown(f"{item['title']}<hr>", unsafe_allow_html=True)
         else: st.warning("No results.")
@@ -233,13 +233,13 @@ if search_button and query_title_input:
         else: st.warning("No results.")
 
     with res_cols[5]:
-        st.subheader("E5 Base")
+        st.subheader("E5 Base (Elastic)")
         if results_e5:
             for it in results_e5: st.markdown(f"**{it['similarity_score']:.4f}** | {it['title']}<hr>", unsafe_allow_html=True)
         else: st.warning("No results.")
 
     with res_cols[6]:
-        st.subheader("E5 Base-Quant")
+        st.subheader("E5 Base-Quant (Elastic)")
         if results_e5quant:
             for it in results_e5quant: st.markdown(f"**{it['similarity_score']:.4f}** | {it['title']}<hr>", unsafe_allow_html=True)
         else: st.warning("No results.")
