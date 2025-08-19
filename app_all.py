@@ -166,7 +166,7 @@ def find_similar_titles_e5(es, query_title: str, top_k: int, index_name: str, mo
         return []
 
 # --- 3. UI ---
-st.title("Job Title Similarity Comparison")
+st.title("Job Title Similarity Comparison - Developer -")
 st.subheader("Search Parameters")
 
 col1, col2, col3 = st.columns([4,2,1])
