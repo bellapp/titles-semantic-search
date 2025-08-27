@@ -106,7 +106,7 @@ def find_similar_titles_openai(es, client, query_title: str, top_k: int):
     if not es or not client: return []
     try:
         query_vector = client.embeddings.create(input=[query_title], model=MODEL_NAME_OPENAI).data[0].embedding
-        knn_query = {"field": "title_embedding", "query_vector": query_vector, "k": top_k, "num_candidates": 100}
+        knn_query = {"field": "title_embedding", "query_vector": query_vector, "k": top_k, "num_candidates": top_k *2}
         resp = es.search(index=TITLES_DICTIONARY_OPENAI, knn=knn_query, size=top_k)
         return [{"title": h["_source"]["title"], "similarity_score": h["_score"]} for h in resp['hits']['hits']]
     except Exception as e:
@@ -118,7 +118,7 @@ def find_similar_titles_cohere(es, client, query_title: str, top_k: int):
     try:
         resp = client.embed(texts=[query_title], model=MODEL_NAME_COHERE, input_type="search_query")
         query_vector = resp.embeddings[0]
-        knn_query = {"field": "title_embedding", "query_vector": query_vector, "k": top_k, "num_candidates": 100}
+        knn_query = {"field": "title_embedding", "query_vector": query_vector, "k": top_k, "num_candidates": top_k *2}
         resp = es.search(index=TITLES_DICTIONARY_COHERE, knn=knn_query, size=top_k)
         return [{"title": h["_source"]["title"], "similarity_score": h["_score"]} for h in resp['hits']['hits']]
     except Exception as e:
@@ -129,7 +129,7 @@ def find_similar_titles_voyage(es, client, query_title: str, top_k: int):
     try:
         resp = client.embed(texts=[query_title], model=MODEL_NAME_VOYAGEAI, input_type="query")
         query_vector = resp.embeddings[0]
-        knn_query = {"field": "title_embedding", "query_vector": query_vector, "k": top_k, "num_candidates": 100}
+        knn_query = {"field": "title_embedding", "query_vector": query_vector, "k": top_k, "num_candidates": top_k *2}
         resp = es.search(index=TITLES_DICTIONARY_VOYAGEAI, knn=knn_query, size=top_k)
         return [{"title": h["_source"]["title"], "similarity_score": h["_score"]} for h in resp['hits']['hits']]
     except Exception as e:
@@ -140,7 +140,7 @@ def find_similar_titles_google(es, model, query_title: str, top_k: int):
     try:
         resp = model.get_embeddings(texts=[query_title])
         query_vector = resp[0].values
-        knn_query = {"field": "title_embedding", "query_vector": query_vector, "k": top_k, "num_candidates": 100}
+        knn_query = {"field": "title_embedding", "query_vector": query_vector, "k": top_k, "num_candidates": top_k *2}
         resp = es.search(index=TITLES_DICTIONARY_GOOGLE, knn=knn_query, size=top_k)
         return [{"title": h["_source"]["title"], "similarity_score": h["_score"]} for h in resp['hits']['hits']]
     except Exception as e:
@@ -158,7 +158,7 @@ def find_similar_titles_e5(es, query_title: str, top_k: int, index_name: str, mo
                 }
             },
             "k": top_k,
-            "num_candidates": 100
+            "num_candidates": top_k *2
         }
         resp = es.search(index=index_name, knn=knn_query, size=top_k)
         return [{"title": h["_source"]["title"], "similarity_score": h["_score"]}
