@@ -87,6 +87,8 @@ def load_es_client():
 
 # --- 2. Search Functions ---
 def find_similar_titles_api(query_title: str, top_k: int):
+    if top_k > 30:
+        top_k = 30
     payload = {"mode": "synonyms", "inputs": [{"input_type": "titles", "input_value": query_title, "size": top_k}]}
     try:
         response = requests.post(LOCAL_API_URL, json=payload, timeout=10)
@@ -173,7 +175,7 @@ col1, col2, col3 = st.columns([4,2,1])
 with col1:
     query_title_input = st.text_input("Job Title", value="senior java developer", label_visibility="collapsed")
 with col2:
-    top_k_input = st.slider("Number of Results", min_value=5, max_value=100, value=20, label_visibility="collapsed")
+    top_k_input = st.slider("Number of Results", min_value=5, max_value=1000, value=20, label_visibility="collapsed")
 with col3:
     search_button = st.button("Run Comparison", type="primary", use_container_width=True)
 
