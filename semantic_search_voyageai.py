@@ -563,10 +563,10 @@ def main():
             
             st.subheader("🎯 Similarity Thresholds")
             title_threshold = st.number_input("Title Threshold", min_value=0.0, max_value=1.0, 
-                                            value=0.7, step=0.05, format="%.2f",
+                                            value=0.6, step=0.05, format="%.2f",
                                             help="Minimum similarity for titles")
             skill_threshold = st.number_input("Skill Threshold", min_value=0.0, max_value=1.0, 
-                                            value=0.6, step=0.05, format="%.2f",
+                                            value=0.5, step=0.05, format="%.2f",
                                             help="Minimum similarity for skills")
             industry_threshold = st.number_input("Industry Threshold", min_value=0.0, max_value=1.0, 
                                                value=0.5, step=0.05, format="%.2f",
