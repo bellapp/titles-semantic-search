@@ -520,7 +520,7 @@ def semantic_profile_search(user_query, title_threshold, skill_threshold, indust
 # Main app
 def main():
     # Header
-    st.markdown('<h1 class="main-header">🔍  Profile Semantic Search Demo (Voyage AI) </h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">🔍  Profile Semantic Search Demo </h1>', unsafe_allow_html=True)
     
     # Load configuration
     config = load_config()
@@ -550,7 +550,7 @@ def main():
         # Search query in main area
         user_query = st.text_area(
             "Enter your search query",
-            placeholder="e.g., je cherche un lead technique java dans la santé",
+            placeholder="e.g., We are hiring  java backend developer in finance",
             height=100,
             help="Enter your search query in natural language. Press Ctrl+Enter to search quickly!",
             key="search_query"
