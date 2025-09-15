@@ -76,6 +76,10 @@ st.markdown("""
     .result-score {
         font-size: 1.1rem;
     }
+    .search-section {
+        padding: 1rem 0;
+        margin-bottom: 2rem;
+    }
 </style>
 
 <script>
@@ -537,25 +541,35 @@ def main():
         st.info("💡 Create a `.env` file based on `env_example.txt` with your actual values.")
         st.stop()
     
+    # Main search input in center of page
+    st.markdown('<div class="search-section">', unsafe_allow_html=True)
+    # st.markdown("### 🔍 Search for Candidates")
+    
+    # Use form for better key handling
+    with st.form(key="search_form", clear_on_submit=False):
+        # Search query in main area
+        user_query = st.text_area(
+            "Enter your search query",
+            placeholder="e.g., je cherche un lead technique java dans la santé",
+            height=100,
+            help="Enter your search query in natural language. Press Ctrl+Enter to search quickly!",
+            key="search_query"
+        )
+        
+        # Search button prominently displayed
+        search_clicked = st.form_submit_button("🚀 Search", type="primary", use_container_width=True)
+        
+        # Keyboard shortcut info
+        st.caption("💡 **Tip:** Press `Ctrl + Enter` anywhere to search quickly!")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
     # Sidebar for parameters
     with st.sidebar:
         st.header("🔧 Search Parameters")
         
-        # Use form for better key handling
-        with st.form(key="search_form", clear_on_submit=False):
-            # Search query
-            user_query = st.text_area(
-                "Search Query",
-                placeholder="e.g., je cherche un lead technique java dans la santé",
-                height=100,
-                help="Enter your search query in natural language. Press Ctrl+Enter to search quickly!",
-                key="search_query"
-            )
-            
-            # Keyboard shortcut info
-            st.caption("💡 **Tip:** Press `Ctrl + Enter` anywhere to search quickly!")
-            
-            st.divider()
+        # Parameters only in sidebar now
+        with st.container():
             
             # Result size
             result_size = st.number_input("Result Size", min_value=1, max_value=50, value=10, step=1,
@@ -590,10 +604,6 @@ def main():
                 help="Choose sorting method: cosine (weighted similarity) or rrf (Elasticsearch RRF score)"
             )
             
-            st.divider()
-            
-            # Search button with form submit
-            search_clicked = st.form_submit_button("🚀 Search", type="primary", use_container_width=True)
     
     # Main content area
     if search_clicked and user_query.strip():
