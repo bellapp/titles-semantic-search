@@ -198,8 +198,9 @@ def build_field_query_texts(structured_json, fallback_text, fields_to_embed):
     skills_text = " | ".join(extract_values(structured_json, "skills")) or ""
     industries_text = " | ".join(extract_values(structured_json, "industries")) or ""
     
-    # Get filter value from structured_json
-    filter_value = structured_json.get("filter", "all") if structured_json else "all"
+    # Get individual filter values for each field
+    titles_filter = structured_json.get("titles", {}).get("filter", "all") if structured_json else "all"
+    industries_filter = structured_json.get("industries", {}).get("filter", "all") if structured_json else "all"
     
     # Initialize the result dictionary (only include fields with non-empty content)
     result = {}
@@ -213,27 +214,27 @@ def build_field_query_texts(structured_json, fallback_text, fields_to_embed):
         # No titles found - return empty result to stop search
         return {}, True  # Empty result, titles_missing=True
     
-    # Apply filter logic for titles (we have valid titles)
-    if filter_value == "current":
+    # Apply filter logic for titles using titles-specific filter
+    if titles_filter == "current":
         # Only search in current titles
         result[fields_to_embed["flat_current_titles"]] = titles_text
-    elif filter_value == "past":
+    elif titles_filter == "past":
         # Only search in past titles
         result[fields_to_embed["flat_past_titles"]] = titles_text
-    else:  # filter_value == "all" or any other value
+    else:  # titles_filter == "all" or any other value
         # Search in both current and past titles
         result[fields_to_embed["flat_current_titles"]] = titles_text
         result[fields_to_embed["flat_past_titles"]] = titles_text
     
-    # Apply filter logic for industries (only if industries_text is not empty)
+    # Apply filter logic for industries using industries-specific filter (only if industries_text is not empty)
     if industries_text.strip():
-        if filter_value == "current":
+        if industries_filter == "current":
             # Only search in current industries
             result[fields_to_embed["flat_current_industries"]] = industries_text
-        elif filter_value == "past":
+        elif industries_filter == "past":
             # Only search in past industries
             result[fields_to_embed["flat_past_industries"]] = industries_text
-        else:  # filter_value == "all" or any other value
+        else:  # industries_filter == "all" or any other value
             # Search in both current and past industries
             result[fields_to_embed["flat_current_industries"]] = industries_text
             result[fields_to_embed["flat_past_industries"]] = industries_text
@@ -295,8 +296,12 @@ def semantic_profile_search(user_query, title_threshold, skill_threshold, indust
             if titles_missing:
                 st.error("❌ **Search stopped**: No job titles found in your query. Please specify job titles to search for candidates.")
                 st.info("💡 **Example**: Try queries like 'java developer', 'senior engineer', 'project manager', etc.")
+                titles_filter = structured_query_json.get("titles", {}).get("filter", "all") if structured_query_json else "all"
+                industries_filter = structured_query_json.get("industries", {}).get("filter", "all") if structured_query_json else "all"
+                
                 return [], 0, {
-                    "filter_value": structured_query_json.get("filter", "all") if structured_query_json else "all",
+                    "titles_filter": titles_filter,
+                    "industries_filter": industries_filter,
                     "error": "no_titles_found",
                     "extracted_query": structured_query_json,
                     "field_texts": {}
@@ -504,8 +509,12 @@ def semantic_profile_search(user_query, title_threshold, skill_threshold, indust
             results = results[:result_size]
             
             # Get filter information for debugging
+            titles_filter = structured_query_json.get("titles", {}).get("filter", "all") if structured_query_json else "all"
+            industries_filter = structured_query_json.get("industries", {}).get("filter", "all") if structured_query_json else "all"
+            
             filter_info = {
-                "filter_value": structured_query_json.get("filter", "all") if structured_query_json else "all",
+                "titles_filter": titles_filter,
+                "industries_filter": industries_filter,
                 "active_fields": list(vector_by_field.keys()),
                 "field_texts": field_texts,
                 "extracted_query": structured_query_json
@@ -648,7 +657,8 @@ def main():
                         st.json(filter_info.get('extracted_query'))
                 else:
                     # Normal successful search analysis
-                    st.markdown(f"**🎯 Filter Applied:** `{filter_info.get('filter_value', 'all')}`")
+                    st.markdown(f"**🎯 Titles Filter:** `{filter_info.get('titles_filter', 'all')}`")
+                    st.markdown(f"**🎯 Industries Filter:** `{filter_info.get('industries_filter', 'all')}`")
                     st.markdown(f"**📊 Active Search Fields:** `{len(filter_info.get('active_fields', []))}`")
                     
                     # Show extracted query data
